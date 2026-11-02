@@ -1,0 +1,57 @@
+services:
+  companion-server:
+    build: .
+    # Must match the tag produced by the Build step in
+    # .gitea/workflows/deploy.yml. Without it, compose derives its own name
+    # (openwebui-companion-companion-server) and `up` silently reuses the
+    # cached image instead of the one just built.
+    image: openwebui-companion:latest
+    container_name: openwebui-companion
+    ports:
+      - "${HOST_PORT:-8090}:8090"
+    environment:
+      # Credentials: supplied by the deploy workflow from Gitea secrets.
+      #
+      # The :? form fails the compose command on an empty or unset value rather
+      # than starting a container with no credential. That matters here because
+      # an empty token does not crash anything -- it silently disables every
+      # Gitea tool and the notes sync.
+      - GITEA_TOKEN=${GITEA_TOKEN:?GITEA_TOKEN is required}
+      - OWUI_TOKEN=${OWUI_TOKEN:?OWUI_TOKEN is required}
+      # Where to connect. No defaults: a wrong host is indistinguishable from a
+      # broken tool at call time, so fail at compose time instead.
+      - GITEA_INSTANCE_URL=${GITEA_INSTANCE_URL:?GITEA_INSTANCE_URL is required}
+      - OWUI_INSTANCE_URL=${OWUI_INSTANCE_URL:?OWUI_INSTANCE_URL is required}
+      # Notes sync. Empty KB id disables the sync without stopping the server.
+      - NOTES_SYNC_KB_ID=${NOTES_SYNC_KB_ID:-}
+      - NOTES_SYNC_INTERVAL=${NOTES_SYNC_INTERVAL:-300}
+      # Leave disabled: GiteaGetToken returns the live token when enabled.
+      - EXPOSE_GITEA_TOKEN=${EXPOSE_GITEA_TOKEN:-false}
+      # Server
+      - HOST=0.0.0.0
+      - PORT=8090
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+    volumes:
+      # Persist evidence data
+      - evidence-data:/data
+    labels:
+      # Dockhand labels every stack it manages and groups the container
+      # under its "internal" stacks. Dropping this makes Dockhand treat the
+      # container as unmanaged, so a later Start/Recreate from its UI may not
+      # use the docker-compose.override.yml rendered by the deploy workflow --
+      # and without that override the required URLs and CA bundle are absent.
+      "managed": "true"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8090/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  evidence-data:
+
+# Site-specific values (a private CA bundle, LAN addresses, a Knowledge Base id)
+# do not belong in this file -- it is published. Put them in
+# docker-compose.override.yml, which compose merges automatically and which is
+# gitignored. See docker-compose.override.yml.example.

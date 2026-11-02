@@ -1,0 +1,58 @@
+# ── Secrets ──────────────────────────────────────────────────────────────────
+# .env holds live credentials for local development only. The deployed container
+# never reads it: docker-compose.yml injects secrets from Gitea secrets via the
+# deploy workflow. Commit .env.example instead.
+.env
+.env.*
+# Site-specific compose overrides (CA bundle paths, LAN addresses, KB ids).
+# Commit the .example, never the real file.
+docker-compose.override.yml
+!.env.example
+
+# Private keys / certificates that should never enter the repo
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa*
+id_ed25519*
+
+# ── Python ───────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.eggs/
+venv/
+.venv/
+env/
+ENV/
+.python-version
+
+# ── Testing / tooling ────────────────────────────────────────────────────────
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+
+# ── Runtime data (also a named volume in compose) ────────────────────────────
+data/
+*.db
+*.sqlite3
+evidence.json
+
+# ── Editors / OS ─────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
