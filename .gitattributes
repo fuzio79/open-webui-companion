@@ -1,0 +1,29 @@
+# Export rules for the public snapshot sync (.gitea/workflows/public-sync.yml).
+#
+# .gitignore has NO effect on files that are already tracked. These
+# export-ignore rules are what actually keep internal files out of the curated
+# public snapshot, so anything built with `git archive` cannot leak them by
+# accident. The workflow asserts the result rather than trusting it.
+#
+# Kept out of the public repo:
+#   .gitea/            this instance's CI; meaningless off-site
+#   .github/           upstream's GitHub-Actions CI, unmodified and unused here.
+#                      Publishing it would ship a workflow pointing at a
+#                      reusable workflow this fork does not own.
+#   HANDOFF.md         operational notes: internal hostname, LAN IP, KB UUID,
+#                      CA path. Session history, not documentation.
+#   README.local.md    same, in table form: instance URLs, CA path, KB id.
+#   plan.md/PLAN.md    working documents. They describe the repo as it was when
+#                      written and then contradict the code. The durable record
+#                      is the PR that implemented the work.
+#   scripts/           publish tooling only, and it no longer exists: the publish
+#                      step is .gitea/workflows/public-sync.yml. Kept as an
+#                      export-ignore rule so a future script dropped in here
+#                      cannot reach the snapshot by default.
+scripts/               export-ignore
+.gitea/                export-ignore
+.github/               export-ignore
+HANDOFF.md             export-ignore
+README.local.md        export-ignore
+plan.md                export-ignore
+PLAN.md                export-ignore

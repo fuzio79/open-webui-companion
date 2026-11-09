@@ -1,0 +1,25 @@
+# Copy to docker-compose.override.yml and edit. Compose merges this file
+# automatically; it is gitignored, so site-specific values never reach the repo.
+#
+#   cp docker-compose.override.yml.example docker-compose.override.yml
+#
+# Everything here is an override of docker-compose.yml, not a replacement.
+
+services:
+  companion-server:
+    environment:
+      # Base URLs of YOUR instances.
+      - GITEA_INSTANCE_URL=https://gitea.example.com
+      - OWUI_INSTANCE_URL=http://10.0.0.10:8082
+      # Knowledge Base to sync notes into. Empty disables the sync.
+      - NOTES_SYNC_KB_ID=
+      - NOTES_SYNC_INTERVAL=300
+
+# If your Gitea uses a self-signed certificate, mount a CA bundle and point
+# Python at it. Without this every API call fails TLS verification.
+#
+#    volumes:
+#      - /path/to/your/ca-bundle.pem:/etc/ssl/certs/ca-certificates.crt:ro
+#    environment:
+#      - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
+#      - SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
